@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2421,6 +2422,9 @@ public class AudioManager {
      *  platform-specific implementation.
      */
     public static final int DEVICE_OUT_DEFAULT = AudioSystem.DEVICE_OUT_DEFAULT;
+    /** {@hide} The audio input device code for an usb device attached
+     */
+    public static final int DEVICE_IN_USB_DEVICE = AudioSystem.DEVICE_IN_USB_DEVICE;
 
     /**
      * Return the enabled devices for the specified output stream type.
