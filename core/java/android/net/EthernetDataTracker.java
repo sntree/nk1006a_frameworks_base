@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2012 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +26,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +48,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private static boolean mLinkUp;
+    private static boolean mNfsmode;
     private LinkProperties mLinkProperties;
     private LinkCapabilities mLinkCapabilities;
     private NetworkInfo mNetworkInfo;
@@ -78,6 +81,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
             if (mIface.equals(iface)) {
                 Log.d(TAG, "Interface " + iface + " link " + (up ? "up" : "down"));
                 mLinkUp = up;
+                mNfsmode = "yes".equals(SystemProperties.get("ro.nfs.mode", "no"));
                 mTracker.mNetworkInfo.setIsAvailable(up);
 
                 // use DHCP
@@ -150,12 +154,14 @@ public class EthernetDataTracker implements NetworkStateTracker {
         msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
         msg.sendToTarget();
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-        try {
-            service.clearInterfaceAddresses(mIface);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to clear addresses or disable ipv6" + e);
+        if (!mNfsmode) {
+           IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+           INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
+           try {
+               service.clearInterfaceAddresses(mIface);
+           } catch (Exception e) {
+               Log.e(TAG, "Failed to clear addresses or disable ipv6" + e);
+           }
         }
     }
 
