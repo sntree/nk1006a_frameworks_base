@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* Copyright 2009-2013 Freescale Semiconductor Inc. */
+
 package android.media;
 
 import android.content.BroadcastReceiver;
@@ -1465,6 +1467,7 @@ public class MediaPlayer
     // There are currently no defined keys usable from Java with get*Parameter.
     // But if any keys are defined, the order must be kept in sync with include/media/mediaplayer.h.
     // private static final int KEY_PARAMETER_... = ...;
+    private static final int KEY_PARAMETER_PLAYBACK_RATE_PERMILLE = 1300;
 
     /**
      * Sets the parameter indicated by key.
@@ -1503,6 +1506,19 @@ public class MediaPlayer
         boolean ret = setParameter(key, p);
         p.recycle();
         return ret;
+    }
+
+    /**
+     * Set play speed.
+     *
+     * @param Speed is normalized speed multiplied by 0x10000
+     * Range of normalized speed is:
+     *         [-16,-2] means rewind, [0.1, 16] means forward, step is 0.1
+     * When normalized speed is [0.1, 1.9] audio is outputted, otherwise audio
+     * is not outputted.
+     */
+    public void setPlaySpeed(int Speed) {
+        setParameter(KEY_PARAMETER_PLAYBACK_RATE_PERMILLE, Speed);
     }
 
     /*
