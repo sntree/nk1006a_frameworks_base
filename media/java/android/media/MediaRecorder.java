@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* Copyright 2009-2013 Freescale Semiconductor Inc. */
+
 package android.media;
 
 import android.app.ActivityThread;
@@ -259,6 +261,8 @@ public class MediaRecorder
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
+        /** MP3 audio codec */
+        public static final int MP3 = 6;
     }
 
     /**
