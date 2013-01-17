@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
- * Copyright (C) 2012 Freescale Semiconductor, Inc.
+ * Copyright (C) 2013 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,7 +233,6 @@ public class EthernetDataTracker implements NetworkStateTracker {
                     mIface = iface;
                     mNMService.setInterfaceUp(iface);
                     InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
-                    mLinkUp = config.hasFlag("up");
                     if (config != null && mHwAddr == null) {
                         mHwAddr = config.getHardwareAddress();
                         if (mHwAddr != null) {
