@@ -1020,7 +1020,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
-        if (shortSizeDp < 600) {
+        String deviceType = SystemProperties.get("sys.device.type");
+        if (! "".equals(deviceType) && deviceType.equals("tablet")) {
+           // if indicate device type is tablet skip the judge for "phone" UI
+        } else if (shortSizeDp < 600) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
             mHasSystemNavBar = false;
             mNavigationBarCanMove = true;
