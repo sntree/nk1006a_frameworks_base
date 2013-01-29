@@ -90,8 +90,10 @@ public class HTML5VideoInline extends HTML5VideoView{
             // The GL texture will store in the VideoLayerManager at native side.
             // They will be clean up when requested.
             // The reason we recreated GL texture name is for screen shot support.
+            if(mTextureNames != null) GLES20.glDeleteTextures(1, mTextureNames, 0);
             mTextureNames = new int[1];
             GLES20.glGenTextures(1, mTextureNames, 0);
+            if(mSurfaceTexture != null) mSurfaceTexture.release();
             mSurfaceTexture = new SurfaceTexture(mTextureNames[0]);
         }
         mVideoLayerUsingSurfaceTexture = videoLayerId;
