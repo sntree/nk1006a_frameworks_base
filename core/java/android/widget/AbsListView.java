@@ -3370,6 +3370,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     removeCallbacks(mPendingCheckForTap);
                 }
             }
+
+            // Make sure sync data on ACTION_DOWN
+            // In mouse click case, only ACTION_DOWN/ACTION_UP which
+            // need to make mDataChanged to be false to make ListView
+            // schedule the ListItem Listener
+            if (mDataChanged) {
+                // Re-sync everything if data has been changed
+                layoutChildren();
+            }
+
             break;
         }
 
