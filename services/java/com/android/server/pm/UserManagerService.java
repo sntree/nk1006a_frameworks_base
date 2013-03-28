@@ -34,6 +34,7 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StatFs;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IUserManager;
@@ -106,6 +107,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final int USER_VERSION = 2;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
+
+    private static final long MIN_AVAILABLE_SPACE = 32 * 1024 * 1024;
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -393,6 +396,21 @@ public class UserManagerService extends IUserManager.Stub {
         int nUsers = mUsers.size();
         return nUsers >= UserManager.getMaxSupportedUsers();
     }
+
+    /**
+     * Check if we've enough space for new user.
+     */
+    private static final boolean isNoFreeSpace() {
+        final String path = Environment.getDataDirectory().getPath();
+        StatFs fileStats = new StatFs(path);
+        long restM = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
+        Slog.w(LOG_TAG, "remain size for data is " + restM);
+        if ( restM < MIN_AVAILABLE_SPACE)
+            return true;
+        else
+            return false;
+    }
+
 
     /**
      * Enforces that only the system UID or root's UID or apps that have the
@@ -822,6 +840,7 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
                     if (isUserLimitReachedLocked()) return null;
+                    if (isNoFreeSpace()) return null;
                     int userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
                     File userPath = new File(mBaseUserPath, Integer.toString(userId));
