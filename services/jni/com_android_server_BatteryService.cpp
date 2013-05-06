@@ -20,6 +20,7 @@
 #include "jni.h"
 #include <utils/Log.h>
 #include <utils/misc.h>
+#include <cutils/properties.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -233,6 +234,13 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
     setIntField(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel);
     setVoltageField(env, obj, gPaths.batteryVoltagePath, gFieldIds.mBatteryVoltage);
     setIntField(env, obj, gPaths.batteryTemperaturePath, gFieldIds.mBatteryTemperature);
+
+	char prop[5];
+	// always report AC plug-in and capacity 100% if emulated.battery is set to 1
+	if (property_get("sys.emulated.battery", prop, "0")== 1){
+		env->SetBooleanField(obj, gFieldIds.mAcOnline, true);
+		env->SetIntField(obj, gFieldIds.mBatteryLevel, 100);
+	}
     
     const int SIZE = 128;
     char buf[SIZE];
