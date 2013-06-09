@@ -237,7 +237,8 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
 
 	char prop[5];
 	// always report AC plug-in and capacity 100% if emulated.battery is set to 1
-	if (property_get("sys.emulated.battery", prop, "0")== 1){
+	property_get("sys.emulated.battery", prop, "0");
+	if (!strcmp(prop, "1")){
 		env->SetBooleanField(obj, gFieldIds.mAcOnline, true);
 		env->SetIntField(obj, gFieldIds.mBatteryLevel, 100);
 	}
