@@ -711,6 +711,11 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 
+        if(!mDataConnected){
+           mDataTypeIconId = 0;
+           mQSDataTypeIconId = 0;
+        }        
+
         if (isCdma()) {
             if (isCdmaEri()) {
                 mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
