@@ -135,7 +135,12 @@ public class FusionEngine implements LocationListener {
             stats.requestTime = SystemClock.elapsedRealtime();
             stats.requested = true;
             stats.minTime = minTime;
-            mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
+            try {
+                mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
+            }
+            catch(IllegalArgumentException e) {
+               e.printStackTrace();
+            }
         } else if (stats.minTime != minTime) {
             stats.minTime = minTime;
             mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
