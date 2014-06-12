@@ -860,6 +860,17 @@ static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject
     }
 }
 
+static void android_hardware_Camera_setSharedMemoryFileDescriptor(JNIEnv *env, jobject thiz, jobject fileDescriptor)
+{
+    ALOGV("setSharedMemoryFileDescriptor");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+
+    camera->setSharedMemoryFileDescriptor(fd);
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -941,6 +952,9 @@ static JNINativeMethod camMethods[] = {
   { "enableFocusMoveCallback",
     "(I)V",
     (void *)android_hardware_Camera_enableFocusMoveCallback},
+  { "native_setSharedMemoryFileDescriptor",
+    "(Ljava/io/FileDescriptor;)V",
+    (void *)android_hardware_Camera_setSharedMemoryFileDescriptor},
 };
 
 struct field {

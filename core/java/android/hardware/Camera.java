@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import java.io.FileDescriptor;
+
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
  * snap pictures, and retrieve frames for encoding for video.  This class is a
@@ -1519,6 +1521,21 @@ public class Camera {
     public static Parameters getEmptyParameters() {
         Camera camera = new Camera();
         return camera.new Parameters();
+    }
+
+    /**
+     * Below are speicified for GUIDE NK1006A platform
+     */
+    private native final void native_setSharedMemoryFileDescriptor(FileDescriptor fd);
+
+    /**
+     * set file descriptor for ir extra data
+     * @param fd the descriptor of share memory
+     *
+     * @hide
+     */
+    public void setSharedMemoryFileDescriptor(FileDescriptor fd) {
+        native_setSharedMemoryFileDescriptor(fd);
     }
 
     /**
