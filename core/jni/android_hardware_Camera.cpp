@@ -871,6 +871,28 @@ static void android_hardware_Camera_setSharedMemoryFileDescriptor(JNIEnv *env, j
     camera->setSharedMemoryFileDescriptor(fd);
 }
 
+static jbyteArray android_hardware_getSharedMemory(JNIEnv *env, jobject thiz)
+{
+    ALOGV("getSharedMemory");    
+    jbyteArray array = NULL;
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return array;
+
+    sp<IMemoryHeap> heap = camera->getSharedMemory();
+    if (heap == NULL) return array;
+
+    jbyte* mem = (jbyte*)heap->getBase();
+    int len = heap->getSize();
+    if (len > 0) {
+        array = env->NewByteArray(len);
+        if (array != NULL) {
+            env->SetByteArrayRegion(array, 0, len, mem);
+        }
+    }
+
+    return array;
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -952,9 +974,9 @@ static JNINativeMethod camMethods[] = {
   { "enableFocusMoveCallback",
     "(I)V",
     (void *)android_hardware_Camera_enableFocusMoveCallback},
-  { "native_setSharedMemoryFileDescriptor",
-    "(Ljava/io/FileDescriptor;)V",
-    (void *)android_hardware_Camera_setSharedMemoryFileDescriptor},
+  { "native_getSharedMemory",
+    "()[B",
+    (void *)android_hardware_Camera_getSharedMemory},
 };
 
 struct field {

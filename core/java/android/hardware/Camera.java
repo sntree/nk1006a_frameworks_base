@@ -1527,7 +1527,7 @@ public class Camera {
      * Below are speicified for GUIDE NK1006A platform
      */
     private native final void native_setSharedMemoryFileDescriptor(FileDescriptor fd);
-
+ 
     /**
      * set file descriptor for ir extra data
      * @param fd the descriptor of share memory
@@ -1536,6 +1536,17 @@ public class Camera {
      */
     public void setSharedMemoryFileDescriptor(FileDescriptor fd) {
         native_setSharedMemoryFileDescriptor(fd);
+    }
+
+    /**
+     * get shared memory from hal
+     *
+     * @hide
+     */
+    private native final void byte[] native_getSharedMemory();
+
+    public void byte[] getSharedMemory() {
+        return native_getSharedMemory();
     }
 
     /**
