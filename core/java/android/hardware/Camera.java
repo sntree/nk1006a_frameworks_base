@@ -1543,9 +1543,9 @@ public class Camera {
      *
      * @hide
      */
-    private native final void byte[] native_getSharedMemory();
+    private native final byte[] native_getSharedMemory();
 
-    public void byte[] getSharedMemory() {
+    public byte[] getSharedMemory() {
         return native_getSharedMemory();
     }
 

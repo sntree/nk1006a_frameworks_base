@@ -871,7 +871,7 @@ static void android_hardware_Camera_setSharedMemoryFileDescriptor(JNIEnv *env, j
     camera->setSharedMemoryFileDescriptor(fd);
 }
 
-static jbyteArray android_hardware_getSharedMemory(JNIEnv *env, jobject thiz)
+static jbyteArray android_hardware_Camera_getSharedMemory(JNIEnv *env, jobject thiz)
 {
     ALOGV("getSharedMemory");    
     jbyteArray array = NULL;
