@@ -1526,20 +1526,9 @@ public class Camera {
     /**
      * Below are speicified for GUIDE NK1006A platform
      */
-    private native final void native_setSharedMemoryFileDescriptor(FileDescriptor fd);
- 
-    /**
-     * set file descriptor for ir extra data
-     * @param fd the descriptor of share memory
-     *
-     * @hide
-     */
-    public void setSharedMemoryFileDescriptor(FileDescriptor fd) {
-        native_setSharedMemoryFileDescriptor(fd);
-    }
 
     /**
-     * get shared memory from hal
+     * get shared memory from hal, must call to get new data for java array issue
      *
      * @hide
      */
@@ -1547,6 +1536,18 @@ public class Camera {
 
     public byte[] getSharedMemory() {
         return native_getSharedMemory();
+    }
+
+	/**
+     * get shared memory from hal by pixel level, always assume 640x488 resolution
+     * using int/long as output for there is no unsigned for java
+     *
+     * @hide
+     */
+    private native final int native_getSharedData(int x, int y);
+
+    public int getSharedData(int x, int y) {
+        return native_getSharedData(x, y);
     }
 
     /**
