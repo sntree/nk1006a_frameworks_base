@@ -74,6 +74,7 @@ public:
     /* below are specified for NK1006A platform */
     jbyteArray getSharedMemory();
     int        getSharedData(int x, int y);
+    int        readSharedData(jbyteArray buffer, int srcOffset, int destOffset, int count);
 
 private:
     void copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType);
@@ -888,6 +889,7 @@ jbyteArray JNICameraContext::getSharedMemory()
 		jbyte* mem = (jbyte*)mSharedMemory->getBase();
 	    int len = mSharedMemory->getSize();
 	    if (len > 0) {
+            JNIEnv *env = AndroidRuntime::getJNIEnv();
 	        array = env->NewByteArray(len);
 	        if (array != NULL) {
 	            env->SetByteArrayRegion(array, 0, len, mem);
@@ -913,9 +915,35 @@ int JNICameraContext::getSharedData(int x,int y)
 	
 	unsigned short* mem = (unsigned short *)mSharedMemory->getBase();
 
-	int pixel = mem[x * 640 + y];
+	int pixel = mem[x + 640 * y];
 
 	return pixel;
+}
+
+static int inline min(int a, int b)
+{
+    return a <= b ? a : b;
+}
+
+int JNICameraContext::readSharedData(jbyteArray buffer, int srcOffset, int destOffset, int count)
+{
+    if (!ensureSharedMemory()) {
+        ALOGE("%s cannot get shared memory", __FUNCTION__); 
+        return -1;
+    }
+
+    // check parameters, buffer and destOffset is checked by java layer
+    if (srcOffset < 0 || srcOffset > 640 * 488 * 2)
+        return -1;
+
+    count = min(count, 640 * 488 * 2 - srcOffset);
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jbyte* mem = (jbyte*)mSharedMemory->getBase();
+
+    env->SetByteArrayRegion(buffer, destOffset, count, (const jbyte *)mem + srcOffset);
+
+    return count;
 }
 
 static jbyteArray android_hardware_Camera_getSharedMemory(JNIEnv *env, jobject thiz)
@@ -942,6 +970,19 @@ static jint android_hardware_Camera_getSharedData(JNIEnv *env, jobject thiz, jin
 		return -1;
 
 	return context->getSharedData(x, y);
+}
+
+static jint android_hardware_Camera_readSharedData(JNIEnv *env, jobject thiz, 
+    jbyteArray buffer, jint srcOffset, jint destOffset, jint count)
+{
+    ALOGV("readSharedData srcOffset %d  destOffset %d  count %d", srcOffset, destOffset, count);
+
+    JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
+
+    if (context == NULL)
+        return -1;
+
+    return context->readSharedData(buffer, srcOffset, destOffset, count);
 }
 
 //-------------------------------------------------
@@ -1031,6 +1072,9 @@ static JNINativeMethod camMethods[] = {
   { "native_getSharedData",
     "(II)I",
     (void *)android_hardware_Camera_getSharedData},
+  { "native_getSharedData",
+    "([BIII)I",
+    (void *)android_hardware_Camera_readSharedData},
 };
 
 struct field {
