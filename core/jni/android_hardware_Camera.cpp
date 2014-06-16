@@ -1072,7 +1072,7 @@ static JNINativeMethod camMethods[] = {
   { "native_getSharedData",
     "(II)I",
     (void *)android_hardware_Camera_getSharedData},
-  { "native_getSharedData",
+  { "native_readSharedData",
     "([BIII)I",
     (void *)android_hardware_Camera_readSharedData},
 };
