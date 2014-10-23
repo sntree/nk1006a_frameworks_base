@@ -43,8 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import java.lang.Math;
-
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
  * snap pictures, and retrieve frames for encoding for video.  This class is a
@@ -1521,48 +1519,6 @@ public class Camera {
     public static Parameters getEmptyParameters() {
         Camera camera = new Camera();
         return camera.new Parameters();
-    }
-
-    /**
-     * Below are speicified for GUIDE NK1006A platform
-     */
-    private native final byte[] native_getSharedMemory();
-
-    /**
-     * get shared memory from hal, must call to get new data for java array issue
-     *
-     * @hide
-     */
-    public byte[] getSharedMemory() {
-        return native_getSharedMemory();
-    }
-
-    private native final int native_getSharedData(int x, int y);
-
-    /**
-     * get shared memory from hal by pixel level, always assume 640x488 resolution
-     * using int/long as output for there is no unsigned for java
-     *
-     * @hide
-     */
-    public int getSharedData(int x, int y) {
-        return native_getSharedData(x, y);
-    }
-
-    private native final int native_readSharedData(byte[] buffer, int srcOffset, int destOffset, int count);
-
-    /**
-     * read shared data instead of get whole for java memory copy issue
-     *
-     * @hide
-     */
-    public int readSharedData(byte[] buffer, int srcOffset, int destOffset, int count){
-        if (destOffset < 0 || destOffset > buffer.length || count < 0)
-            return -1;
-
-        count = Math.min(count, buffer.length - destOffset);
-
-        return native_readSharedData(buffer, srcOffset, destOffset, count);
     }
 
     /**
