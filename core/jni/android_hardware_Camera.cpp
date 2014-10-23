@@ -71,6 +71,11 @@ public:
     bool isRawImageCallbackBufferAvailable() const;
     void release();
 
+    /* below are specified for NK1006A platform */
+    jbyteArray getSharedMemory();
+    int        getSharedData(int x, int y);
+    int        readSharedData(jbyteArray buffer, int srcOffset, int destOffset, int count);
+
 private:
     void copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType);
     void clearCallbackBuffers_l(JNIEnv *env, Vector<jbyteArray> *buffers);
@@ -102,6 +107,12 @@ private:
     bool mManualBufferMode;              // Whether to use application managed buffers.
     bool mManualCameraCallbackSet;       // Whether the callback has been set, used to
                                          // reduce unnecessary calls to set the callback.
+
+										 
+	/* specified for NK1006A platform */
+	sp<IMemoryHeap>  mSharedMemory;
+
+	bool ensureSharedMemory();
 };
 
 bool JNICameraContext::isRawImageCallbackBufferAvailable() const
@@ -860,6 +871,120 @@ static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject
     }
 }
 
+bool JNICameraContext::ensureSharedMemory()
+{
+	if (mSharedMemory.get())
+		return true;
+
+	mSharedMemory = mCamera->getSharedMemory();
+
+	return mSharedMemory.get() != NULL;
+}
+
+jbyteArray JNICameraContext::getSharedMemory()
+{
+	jbyteArray array = NULL;
+
+	if (ensureSharedMemory()) {
+		jbyte* mem = (jbyte*)mSharedMemory->getBase();
+	    int len = mSharedMemory->getSize();
+	    if (len > 0) {
+            JNIEnv *env = AndroidRuntime::getJNIEnv();
+	        array = env->NewByteArray(len);
+	        if (array != NULL) {
+	            env->SetByteArrayRegion(array, 0, len, mem);
+	        }
+	    }
+	}
+
+	return array;
+}
+
+int JNICameraContext::getSharedData(int x,int y)
+{
+	if (!ensureSharedMemory()) {
+		ALOGE("%s cannot get shared memory", __FUNCTION__); 
+		return -1;
+	}
+
+	// always assume 640x488x2 format
+	if (x < 0 || x >= 640 || y < 0 || y >= 488) {
+		ALOGE("%s invalid pixel position %d %d", __FUNCTION__, x, y);
+		return -1;
+	}
+	
+	unsigned short* mem = (unsigned short *)mSharedMemory->getBase();
+
+	int pixel = mem[x + 640 * y];
+
+	return pixel;
+}
+
+static int inline min(int a, int b)
+{
+    return a <= b ? a : b;
+}
+
+int JNICameraContext::readSharedData(jbyteArray buffer, int srcOffset, int destOffset, int count)
+{
+    if (!ensureSharedMemory()) {
+        ALOGE("%s cannot get shared memory", __FUNCTION__); 
+        return -1;
+    }
+
+    // check parameters, buffer and destOffset is checked by java layer
+    if (srcOffset < 0 || srcOffset > 640 * 488 * 2)
+        return -1;
+
+    count = min(count, 640 * 488 * 2 - srcOffset);
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jbyte* mem = (jbyte*)mSharedMemory->getBase();
+
+    env->SetByteArrayRegion(buffer, destOffset, count, (const jbyte *)mem + srcOffset);
+
+    return count;
+}
+
+static jbyteArray android_hardware_Camera_getSharedMemory(JNIEnv *env, jobject thiz)
+{
+    ALOGV("getSharedMemory");
+
+    jbyteArray array = NULL;
+    
+    JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
+
+    if (context != NULL)
+    	array = context->getSharedMemory();
+
+    return array;
+}
+
+static jint android_hardware_Camera_getSharedData(JNIEnv *env, jobject thiz, jint x, jint y)
+{
+    ALOGV("getSharedData %d %d", x, y);
+
+	JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
+
+	if (context == NULL)
+		return -1;
+
+	return context->getSharedData(x, y);
+}
+
+static jint android_hardware_Camera_readSharedData(JNIEnv *env, jobject thiz, 
+    jbyteArray buffer, jint srcOffset, jint destOffset, jint count)
+{
+    ALOGV("readSharedData srcOffset %d  destOffset %d  count %d", srcOffset, destOffset, count);
+
+    JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
+
+    if (context == NULL)
+        return -1;
+
+    return context->readSharedData(buffer, srcOffset, destOffset, count);
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -941,6 +1066,15 @@ static JNINativeMethod camMethods[] = {
   { "enableFocusMoveCallback",
     "(I)V",
     (void *)android_hardware_Camera_enableFocusMoveCallback},
+  { "native_getSharedMemory",
+    "()[B",
+    (void *)android_hardware_Camera_getSharedMemory},
+  { "native_getSharedData",
+    "(II)I",
+    (void *)android_hardware_Camera_getSharedData},
+  { "native_readSharedData",
+    "([BIII)I",
+    (void *)android_hardware_Camera_readSharedData},
 };
 
 struct field {
