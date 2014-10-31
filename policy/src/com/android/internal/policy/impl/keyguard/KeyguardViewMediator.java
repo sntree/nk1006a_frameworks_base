@@ -192,7 +192,7 @@ public class KeyguardViewMediator {
     /**
      * External apps (like the phone app) can tell us to disable the keygaurd.
      */
-    private boolean mExternallyEnabled = true;
+    private boolean mExternallyEnabled = false;  // default is unlocked for NK1006A
 
     /**
      * Remember if an external call to {@link #setKeyguardEnabled} with value
