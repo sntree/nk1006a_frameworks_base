@@ -219,9 +219,11 @@ class ServerThread extends Thread {
             display = new DisplayManagerService(context, wmHandler, uiHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
+            if (false) { // disable
             Slog.i(TAG, "Telephony Registry");
             telephonyRegistry = new TelephonyRegistry(context);
             ServiceManager.addService("telephony.registry", telephonyRegistry);
+            } else Slog.i(TAG, "Disable Telephony Registry");
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService(Context.SCHEDULING_POLICY_SERVICE,
@@ -579,6 +581,7 @@ class ServerThread extends Thread {
                 reportWtf("starting Country Detector", e);
             }
 
+            if (false)  { // disable search service
             try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
@@ -586,6 +589,8 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting Search Service", e);
             }
+            }
+            else Slog.i(TAG, "Disable Search Service");
 
             try {
                 Slog.i(TAG, "DropBox Service");
@@ -595,6 +600,7 @@ class ServerThread extends Thread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
+            if (true) { // disable
             if (context.getResources().getBoolean(
                         com.android.internal.R.bool.config_enableWallpaperService)) {
                 try {
@@ -607,6 +613,7 @@ class ServerThread extends Thread {
                     reportWtf("starting Wallpaper Service", e);
                 }
             }
+            } else Slog.i(TAG, "Disable Wallpaper Service");
 
             if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
                 try {
@@ -617,6 +624,7 @@ class ServerThread extends Thread {
                 }
             }
 
+            if (false) { // disable
             try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes
@@ -633,6 +641,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting WiredAccessoryManager", e);
             }
+            } else Slog.i(TAG, "Disable Dock Observer & Wired Accessory Manager");
 
             try {
                 Slog.i(TAG, "USB Service");
@@ -666,7 +675,8 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting UiModeManagerService", e);
             }
-
+ 
+            if (false) { // disable
             try {
                 Slog.i(TAG, "Backup Service");
                 ServiceManager.addService(Context.BACKUP_SERVICE,
@@ -674,6 +684,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Backup Service", e);
             }
+            } else Slog.i(TAG, "Disable Backup Service");
 
             try {
                 Slog.i(TAG, "AppWidget Service");
@@ -683,12 +694,14 @@ class ServerThread extends Thread {
                 reportWtf("starting AppWidget Service", e);
             }
 
+            if (false) { // disable
             try {
                 Slog.i(TAG, "Recognition Service");
                 recognition = new RecognitionManagerService(context);
             } catch (Throwable e) {
                 reportWtf("starting Recognition Service", e);
             }
+            } else Slog.i(TAG, "Disable Recognition Service");
 
             try {
                 Slog.i(TAG, "DiskStats Service");
