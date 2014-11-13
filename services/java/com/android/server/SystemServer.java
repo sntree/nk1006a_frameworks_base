@@ -581,7 +581,7 @@ class ServerThread extends Thread {
                 reportWtf("starting Country Detector", e);
             }
 
-            if (false)  { // disable search service
+            if (true)  { // disable search service
             try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
@@ -676,7 +676,7 @@ class ServerThread extends Thread {
                 reportWtf("starting UiModeManagerService", e);
             }
  
-            if (false) { // disable
+            if (true) { // disable
             try {
                 Slog.i(TAG, "Backup Service");
                 ServiceManager.addService(Context.BACKUP_SERVICE,
